@@ -16,12 +16,13 @@ def set_schema(client):
 
     post_id: string @index(hash) .
     content: string .  # Tipo de contenido: texto, imagen, video, etc.
-    timestamp: datetime @index(datetime) .
+    timestamp: string @index(exact) .
 
     comment_id: string @index(hash) .
     text: string .
-    comment_timestamp: datetime @index(datetime) .
+    comment_timestamp: string @index(exact) .
 
+    topic_id: string @index(hash) .
     topic_name: string @index(term) .
 
     follows: [uid] @reverse .
@@ -62,6 +63,7 @@ def set_schema(client):
     }
 
     type Topic {
+        topic_id
         topic_name
     }
     """
@@ -676,3 +678,9 @@ def recommend_posts_to_share(user_id, client):
         "user": {"user_id": user_id, "name": user["name"]},
         "recommended_to_share": recommendations,
     }
+
+
+# Drop all data and schema
+def drop_all(client):
+    print("All data and schema dropped from the graph.")
+    return client.alter(pydgraph.Operation(drop_all=True))

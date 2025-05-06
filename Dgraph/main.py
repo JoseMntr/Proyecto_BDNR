@@ -24,6 +24,8 @@ def print_menu():
         11: "Recomendar contenido",
         12: "Recomendar posts para interactuar",
         13: "Recomendar posts para compartir",
+        14: "Drop all data and schema",
+        15: "Exit",
         0: "Salir"
     }
 
@@ -65,7 +67,6 @@ def main():
             comments_uids = populate.load_comments("data/nodes/comments.csv", client)
 
             # Crear relaciones después de cargar nodos
-
             populate.create_generic_edge(client, "data/edges/follows.csv", users_uids, users_uids, "follower_id", "followed_id", "follows")
 
             populate.create_generic_edge(client, "data/edges/post.csv", users_uids, posts_uids, "user_id", "post_id", "post")
@@ -119,9 +120,16 @@ def main():
         elif option == 12:
             u = input("ID del usuario: ")
             print(model.recommend_posts(u, client))
-        elif option == 12:
+        elif option == 13:
             u = input("ID del usuario: ")
             print(model.recommend_posts_to_share(u, client))
+        elif option == 14:
+            model.drop_all(client)
+            schemaUp = False
+        elif option == 15:
+            model.drop_all(client)
+            close_client_stub(client_stub)
+            exit(0)
         elif option == 0:
             print("Saliendo del sistema...")
         else:

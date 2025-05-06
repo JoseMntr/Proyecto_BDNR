@@ -29,9 +29,6 @@ def load_users(file_path, client):
 
 # Load posts from CSV file
 def load_posts(file_path, client):
-    import csv
-    from datetime import datetime
-
     txn = client.txn()
     resp = None
     try:
@@ -66,8 +63,6 @@ def load_posts(file_path, client):
 
 # Load topics from CSV file
 def load_topics(file_path, client):
-    import csv
-
     txn = client.txn()
     resp = None
     try:
@@ -75,11 +70,12 @@ def load_topics(file_path, client):
         with open(file_path, "r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
             for row in reader:
+                topic_id = row["topic_id"].strip()
                 topic_name = row["topic_name"].strip()
                 if topic_name:
                     topics.append(
                         {
-                            "uid": "_:" + topic_name,
+                            "uid": "_:" + topic_id,
                             "dgraph.type": "Topic",
                             "topic_name": topic_name,
                         }
@@ -94,8 +90,6 @@ def load_topics(file_path, client):
 
 # Load comments from CSV file
 def load_comments(file_path, client):
-    import csv
-
     txn = client.txn()
     resp = None
     try:
