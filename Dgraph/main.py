@@ -22,7 +22,7 @@ def print_menu():
         8: "Ver comentarios en un post",
         9: "Ver seguidores mutuos",
         10: "Recomendar cuentas",
-        11: "Recomendar contenido",
+        11: "Recomendar cuentas por interacción",
         12: "Recomendar posts para interactuar",
         13: "Recomendar posts para compartir",
         14: "Drop all data and schema",
@@ -73,7 +73,7 @@ def main():
             # # Crear relaciones después de cargar nodos
             populate.create_generic_edge(client, "data/edges/follows.csv", users_uids, users_uids, "follower_id", "followed_id", "follows")
 
-            populate.create_generic_edge(client, "data/edges/post.csv", users_uids, posts_uids, "user_id", "post_id", "post")
+            populate.create_generic_edge(client, "data/edges/post.csv", users_uids, posts_uids, "user_id", "post_id", "posts")
             populate.create_generic_edge(client, "data/edges/likes.csv", users_uids, posts_uids, "user_id", "post_id", "likes")
             populate.create_generic_edge(client, "data/edges/shares.csv", users_uids, posts_uids, "user_id", "post_id", "shares")
 
@@ -88,45 +88,45 @@ def main():
         elif option == 2:
             u1 = input("ID del seguidor: ")
             u2 = input("ID del seguido: ")
-            print(model.follow_user(u1, u2, client))
+            model.follow_user(u1, u2, client)
         elif option == 3:
             u1 = input("ID del que deja de seguir: ")
             u2 = input("ID del usuario a dejar de seguir: ")
-            print(model.unfollow_user(u1, u2, client))
+            model.unfollow_user(u1, u2, client)
         elif option == 4:
             u = input("ID del usuario: ")
             p = input("ID del post: ")
-            print(model.like_post(u, p, client))
+            model.like_post(u, p, client)
         elif option == 5:
             u = input("ID del usuario: ")
             p = input("ID del post: ")
             text = input("Texto del comentario: ")
-            print(model.comment_post(u, p, text, client))
+            model.comment_post(u, p, text, client)
         elif option == 6:
             u = input("ID del usuario: ")
-            print(model.get_following(u, client))
+            model.get_following(u, client)
         elif option == 7:
             u = input("ID del usuario: ")
-            print(model.get_followers(u, client))
+            model.get_followers(u, client)
         elif option == 8:
             p = input("ID del post: ")
-            print(model.get_comments(p, client))
+            model.get_comments(p, client)
         elif option == 9:
             u1 = input("ID del primer usuario: ")
             u2 = input("ID del segundo usuario: ")
-            print(model.get_mutual_followers(u1, u2, client))
+            model.get_mutual_followers(u1, u2, client)
         elif option == 10:
             u = input("ID del usuario: ")
-            print(model.recommend_users(u, client))
+            model.recommend_users(u, client)
         elif option == 11:
             u = input("ID del usuario: ")
-            print(model.recommend_content(u, client))
+            model.recomend_users_by_interaction(u, client)
         elif option == 12:
             u = input("ID del usuario: ")
-            print(model.recommend_posts(u, client))
+            model.recommend_posts(u, client)
         elif option == 13:
             u = input("ID del usuario: ")
-            print(model.recommend_posts_to_share(u, client))
+            model.recommend_posts_to_share(u, client)
         elif option == 14:
             model.drop_all(client)
             schemaUp = False

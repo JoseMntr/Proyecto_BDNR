@@ -107,11 +107,13 @@ def follow_user(follower_id, followee_id, client):
         txn.commit()
     finally:
         txn.discard()
-
-    return {
+    response = {
         "follower": {"user_id": follower["user_id"], "name": follower["name"]},
         "followee": {"user_id": followee["user_id"], "name": followee["name"]},
     }
+
+    print("\nRelación de seguimiento creada:")
+    print(json.dumps(response, indent=2))
 
 
 # Unfollow a user
@@ -143,15 +145,19 @@ def unfollow_user(follower_id, followee_id, client):
     txn = client.txn()
     try:
         deletion = {"uid": follower["uid"], "follows": [{"uid": followee["uid"]}]}
-        txn.mutate(delete_obj=deletion)
+        txn.mutate(del_obj=deletion)
         txn.commit()
     finally:
         txn.discard()
 
-    return {
+    # Estructura de respuesta
+    response = {
         "unfollower": {"user_id": follower["user_id"], "name": follower["name"]},
         "unfollowed": {"user_id": followee["user_id"], "name": followee["name"]},
     }
+
+    print("\nRelación de seguimiento eliminada:")
+    print(json.dumps(response, indent=2))
 
 
 # Like a post
@@ -189,10 +195,19 @@ def like_post(user_id, post_id, client):
     finally:
         txn.discard()
 
-    return {
-        "user": {"user_id": user["user_id"], "name": user["name"]},
-        "post": {"post_id": post["post_id"], "content": post["content"]},
+    response = {
+    "user": {
+        "user_id": user["user_id"],
+        "name": user["name"]
+    },
+    "post": {
+        "post_id": post["post_id"],
+        "content": post["content"]
     }
+  }
+
+    print("\nInteracción registrada:")
+    print(json.dumps(response, indent=2))
 
 
 # Comment on a post
@@ -222,8 +237,9 @@ def comment_post(user_id, post_id, text, client):
         return {"error": "Usuario o post no encontrado"}
 
     # Crear comentario y relaciones
-    timestamp = datetime.utcnow().isoformat()
-    comment_id = f"c-{user_id}-{post_id}-{int(datetime.utcnow().timestamp())}"
+    timestamp = datetime.datetime.now().isoformat()
+    print("timestamp", timestamp)
+    comment_id = f"c-{user_id}-{post_id}-{int(datetime.datetime.now().timestamp())}"
 
     txn = client.txn()
     try:
@@ -235,7 +251,7 @@ def comment_post(user_id, post_id, text, client):
                     "dgraph.type": "Comment",
                     "comment_id": comment_id,
                     "text": text,
-                    "timestamp": timestamp,
+                    "comment_timestamp": timestamp,
                     "commented_on": {"uid": post["uid"]},
                 }
             ],
@@ -245,11 +261,17 @@ def comment_post(user_id, post_id, text, client):
     finally:
         txn.discard()
 
-    return {
+    response = {
         "user": {"user_id": user["user_id"], "name": user["name"]},
         "post": {"post_id": post["post_id"], "content": post["content"]},
-        "comment": {"comment_id": comment_id, "text": text, "timestamp": timestamp},
+        "comment": {
+            "comment_id": comment_id,
+            "text": text,
+            "comment_timestamp": timestamp,
+        },
     }
+    print("\nComentario registrado:")
+    print(json.dumps(response, indent=2))
 
 
 # Get followers of a user
@@ -275,10 +297,12 @@ def get_following(user_id, client):
 
     following = user.get("follows", [])
 
-    return {
+    response = {
         "user": {"user_id": user["user_id"], "name": user["name"]},
         "following": following,
     }
+    print("\nSiguiendo:")
+    print(json.dumps(response, indent=2))
 
 
 # Get followers of a user
@@ -304,10 +328,12 @@ def get_followers(user_id, client):
 
     followers = user.get("~follows", [])
 
-    return {
+    response = {
         "user": {"user_id": user["user_id"], "name": user["name"]},
         "followers": followers,
     }
+    print("\nSeguidores:")
+    print(json.dumps(response, indent=2))
 
 
 # Get comments on a post
@@ -320,7 +346,7 @@ def get_comments(post_id, client):
         ~commented_on {{
           comment_id
           text
-          timestamp
+          comment_timestamp
           ~comments {{
             user_id
             name
@@ -344,14 +370,16 @@ def get_comments(post_id, client):
                 "user_id": user.get("user_id", "N/A"),
                 "name": user.get("name", "N/A"),
                 "comment_text": comment["text"],
-                "timestamp": comment["timestamp"],
+                "comment_timestamp": comment["comment_timestamp"],
             }
         )
 
-    return {
+    response = {
         "post": {"post_id": post["post_id"], "content": post["content"]},
         "comments": comments,
     }
+    print("\nComentarios en el post:")
+    print(json.dumps(response, indent=2))
 
 
 # Get mutual followers between two users
@@ -383,11 +411,14 @@ def get_mutual_followers(user1_id, user2_id, client):
     mutual_uids = set(user1_follows.keys()) & set(user2_follows.keys())
     mutual_users = [user1_follows[uid] for uid in mutual_uids]
 
-    return {"mutual_followees": mutual_users}
+    response = {"mutual_followees": mutual_users}
+
+    print("\nSeguidores mutuos:")
+    print(json.dumps(response, indent=2))
 
 
 # Get recommended content based on user interactions
-def recommend_content(user_id, client):
+def recomend_users_by_interaction(user_id, client):
     query_str = f"""
     {{
       user(func: eq(user_id, "{user_id}")) {{
@@ -429,6 +460,8 @@ def recommend_content(user_id, client):
             )[0]
             if "user_id" in target_user:
                 uid = target_user["user_id"]
+                if uid == user_id:
+                    continue  # Ignorar interacciones consigo mismo
                 interaction_counts[uid] = interaction_counts.get(
                     uid, {"count": 0, "name": target_user["name"]}
                 )
@@ -444,10 +477,12 @@ def recommend_content(user_id, client):
         for uid, info in sorted_users
     ]
 
-    return {
+    response = {
         "user": {"user_id": user_id, "name": user["name"]},
         "recommended_accounts": recommendations,
     }
+    print("\nCuentas recomendadas por interacción:")
+    print(json.dumps(response, indent=2))
 
 
 # Get recommended users based on mutual connections and interests
@@ -458,6 +493,8 @@ def recommend_users(user_id, client):
         uid
         name
         follows {{
+          uid
+          user_id
           follows {{
             uid
             user_id
@@ -481,13 +518,15 @@ def recommend_users(user_id, client):
     if not user:
         return {"error": "Usuario no encontrado"}
 
+    own_uid = user["uid"]
+    already_followed_uids = {f["uid"] for f in user.get("follows", [])}
     uid_seen = set()
     score_map = {}
 
     # Recomendaciones por conexiones mutuas (seguidores de seguidores)
     for followed in user.get("follows", []):
         for suggestion in followed.get("follows", []):
-            if suggestion["uid"] != user["uid"]:
+            if suggestion["uid"] != own_uid and suggestion["uid"] not in already_followed_uids:
                 uid = suggestion["uid"]
                 if uid not in uid_seen:
                     uid_seen.add(uid)
@@ -502,7 +541,7 @@ def recommend_users(user_id, client):
     # Recomendaciones por intereses comunes
     for topic in user.get("interested_in", []):
         for related_user in topic.get("~interested_in", []):
-            if related_user["uid"] != user["uid"]:
+            if related_user["uid"] != own_uid and related_user["uid"] not in already_followed_uids:
                 uid = related_user["uid"]
                 if uid not in uid_seen:
                     uid_seen.add(uid)
@@ -517,10 +556,14 @@ def recommend_users(user_id, client):
     # Convertir a lista y ordenar por score
     recommendations = sorted(score_map.values(), key=lambda x: x["score"], reverse=True)
 
-    return {
+    response = {
         "user": {"user_id": user_id, "name": user["name"]},
         "recommended_users": recommendations,
     }
+
+    print("\nUsuarios recomendados:")
+    print(json.dumps(response, indent=2))
+
 
 
 # Get recommended posts based that the user will probably engage with
@@ -599,10 +642,12 @@ def recommend_posts(user_id, client):
         post_scores.values(), key=lambda x: x["score"], reverse=True
     )
 
-    return {
+    response = {
         "user": {"user_id": user_id, "name": user["name"]},
         "recommended_posts": recommendations,
     }
+    print("\nPosts recomendados:")
+    print(json.dumps(response, indent=2))
 
 
 # Get Recommend Posts that the User Will Probably Share
@@ -674,10 +719,12 @@ def recommend_posts_to_share(user_id, client):
         r["sharing_probability"] = round(r["score"] / total_score, 2)
         del r["score"]
 
-    return {
+    response = {
         "user": {"user_id": user_id, "name": user["name"]},
         "recommended_to_share": recommendations,
     }
+    print("\nPosts recomendados para compartir:")
+    print(json.dumps(response, indent=2))
 
 
 # Drop all data and schema
