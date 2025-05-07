@@ -23,12 +23,11 @@ def print_menu():
         11: "Recomendar cuentas por interacción",
         12: "Recomendar posts para interactuar",
         13: "Recomendar posts para compartir",
-        14: "Drop all data and schema",
-        15: "Exit",
-        0: "Salir",
+        14: "Borrar toda la data & schema",
+        15: "Regresar al menú principal",
     }
 
-    print("\n--- MENÚ PRINCIPAL ---")
+    print("\n--- MENÚ PRINCIPAL DGRAPH ---")
     for key in sorted(mm_options.keys()):
         print(f"{key}. {mm_options[key]}")
 
@@ -133,8 +132,6 @@ def main():
             close_client_stub(client_stub)
             # exit(0)
             return
-        elif option == 0:
-            print("Saliendo del sistema...")
         else:
             print("Opción no válida.")
 
