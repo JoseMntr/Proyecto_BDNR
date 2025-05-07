@@ -22,6 +22,7 @@ def load_users(file_path, client):
                 )
             resp = txn.mutate(set_obj=users)
         txn.commit()
+        print("Users cargados exitosamente.")
     finally:
         txn.discard()
     return resp.uids
@@ -102,17 +103,17 @@ def load_comments(file_path, client):
                     "dgraph.type": "Comment",
                     "comment_id": row["comment_id"],
                     "text": row["text"],
-                    "comment_timestamp": row["comment_timestamp"],
-                    "commented_on": {"uid": "_:" + row["post_id"]},
+                    "comment_timestamp": row["comment_timestamp"]
                 }
-                # Relación desde el usuario que escribió el comentario
-                comments.append({"uid": "_:" + row["user_id"], "comments": [comment]})
+                comments.append(comment)
+
             resp = txn.mutate(set_obj=comments)
         txn.commit()
         print("Comentarios cargados exitosamente.")
     finally:
         txn.discard()
     return resp.uids
+
 
 
 # Create edges between nodes

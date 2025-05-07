@@ -7,7 +7,8 @@ import model
 
 import populate
 
-DGRAPH_URI = os.getenv('DGRAPH_URI', 'localhost:9080')
+DGRAPH_URI = os.getenv("DGRAPH_URI", "localhost:9080")
+
 
 def print_menu():
     mm_options = {
@@ -26,7 +27,7 @@ def print_menu():
         13: "Recomendar posts para compartir",
         14: "Drop all data and schema",
         15: "Exit",
-        0: "Salir"
+        0: "Salir",
     }
 
     print("\n--- MENÚ PRINCIPAL ---")
@@ -38,12 +39,15 @@ def print_menu():
 def create_client_stub():
     return pydgraph.DgraphClientStub(DGRAPH_URI)
 
+
 # Crea el cliente principal de Dgraph: realizar operaciones de alto nivel como queries, mutaciones y transacciones.
 def create_client(client_stub):
     return pydgraph.DgraphClient(client_stub)
 
+
 def close_client_stub(client_stub):
     client_stub.close()
+
 
 def main():
     # Inicializar Client Stub y Dgraph Client
@@ -54,9 +58,9 @@ def main():
     model.set_schema(client)
     schemaUp = True
 
-    while(True):
+    while True:
         print_menu()
-        option = int(input('Enter your choice: '))
+        option = int(input("Enter your choice: "))
         if option == 1:
             if not schemaUp:
                 schemaUp = model.set_schema(client)
@@ -66,19 +70,19 @@ def main():
             topics_uids = populate.load_topics("data/nodes/topics.csv", client)
             comments_uids = populate.load_comments("data/nodes/comments.csv", client)
 
-            # Crear relaciones después de cargar nodos
+            # # Crear relaciones después de cargar nodos
             populate.create_generic_edge(client, "data/edges/follows.csv", users_uids, users_uids, "follower_id", "followed_id", "follows")
 
             populate.create_generic_edge(client, "data/edges/post.csv", users_uids, posts_uids, "user_id", "post_id", "post")
             populate.create_generic_edge(client, "data/edges/likes.csv", users_uids, posts_uids, "user_id", "post_id", "likes")
             populate.create_generic_edge(client, "data/edges/shares.csv", users_uids, posts_uids, "user_id", "post_id", "shares")
-        
+
             populate.create_generic_edge(client, "data/edges/comments.csv", users_uids, comments_uids, "user_id", "comment_id", "comments")
             populate.create_generic_edge(client, "data/edges/commented_on.csv", comments_uids, posts_uids, "comment_id", "post_id", "commented_on")
 
             populate.create_generic_edge(client, "data/edges/interested_in.csv", users_uids, topics_uids, "user_id", "topic_id", "interested_in")
             populate.create_generic_edge(client, "data/edges/about.csv", posts_uids, topics_uids, "post_id", "topic_id", "about")
-            
+
             print("Data loaded successfully.")
 
         elif option == 2:
@@ -134,8 +138,10 @@ def main():
             print("Saliendo del sistema...")
         else:
             print("Opción no válida.")
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print('Error: {}'.format(e))
+        print("Error: {}".format(e))
