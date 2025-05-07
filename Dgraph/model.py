@@ -75,7 +75,7 @@ def set_schema(client):
 
 # Follow a user
 def follow_user(follower_id, followee_id, client):
-    # Obtener los UID de ambos usuarios
+    # Obtener los UID de ambos usuarios mediante una consulta
     query_str = f"""
     {{
       follower(func: eq(user_id, "{follower_id}")) {{
@@ -90,30 +90,41 @@ def follow_user(follower_id, followee_id, client):
       }}
     }}
     """
+    # Ejecutar la consulta para obtener los datos de los usuarios
     res = client.txn(read_only=True).query(query_str)
     users = json.loads(res.json)
 
+    # Obtener el primer resultado de cada usuario (si existe)
     follower = users.get("follower", [None])[0]
     followee = users.get("followee", [None])[0]
 
+    # Si no se encuentran los usuarios, retornar un mensaje de error
     if not follower or not followee:
         return {"error": "Uno o ambos usuarios no existen"}
 
-    # Crear la relación follows
+    # Crear la relación 'follows' en la base de datos
     txn = client.txn()
     try:
+        # Construir el objeto de mutación que define la relación de seguimiento
         mutation = {"uid": follower["uid"], "follows": [{"uid": followee["uid"]}]}
+        # Ejecutar la mutación para agregar la relación de seguimiento
         txn.mutate(set_obj=mutation)
+        # Confirmar la transacción
         txn.commit()
     finally:
+        # Asegurarse de que la transacción se descarte en caso de error
         txn.discard()
+
+    # Crear la respuesta con los datos de los usuarios
     response = {
         "follower": {"user_id": follower["user_id"], "name": follower["name"]},
         "followee": {"user_id": followee["user_id"], "name": followee["name"]},
     }
 
+    # Imprimir la relación de seguimiento creada
     print("\nRelación de seguimiento creada:")
     print(json.dumps(response, indent=2))
+
 
 
 # Unfollow a user
@@ -486,7 +497,9 @@ def recomend_users_by_interaction(user_id, client):
 
 
 # Get recommended users based on mutual connections and interests
+# Función para recomendar usuarios a seguir en base a conexiones mutuas e intereses comunes
 def recommend_users(user_id, client):
+    # Consulta para obtener los usuarios que sigue el usuario dado y sus intereses
     query_str = f"""
     {{
       user(func: eq(user_id, "{user_id}")) {{
@@ -511,58 +524,72 @@ def recommend_users(user_id, client):
       }}
     }}
     """
+    # Ejecutar la consulta para obtener los datos relacionados con el usuario y sus relaciones
     res = client.txn(read_only=True).query(query_str)
     data = json.loads(res.json)
 
+    # Obtener el usuario principal de la respuesta
     user = data.get("user", [None])[0]
+    
+    # Si el usuario no existe, retornar un mensaje de error
     if not user:
         return {"error": "Usuario no encontrado"}
 
+    # Obtener el UID del usuario principal y los usuarios que ya sigue
     own_uid = user["uid"]
     already_followed_uids = {f["uid"] for f in user.get("follows", [])}
-    uid_seen = set()
-    score_map = {}
+    uid_seen = set()  # Para evitar recomendaciones repetidas
+    score_map = {}  # Mapa de puntuación para los usuarios recomendados
 
     # Recomendaciones por conexiones mutuas (seguidores de seguidores)
-    for followed in user.get("follows", []):
-        for suggestion in followed.get("follows", []):
+    for followed in user.get("follows", []):  # Para cada usuario seguido por el usuario principal
+        for suggestion in followed.get("follows", []):  # Buscar los seguidores de cada usuario seguido
+            # Si el usuario sugerido no es el mismo que el principal y no lo sigue ya
             if suggestion["uid"] != own_uid and suggestion["uid"] not in already_followed_uids:
                 uid = suggestion["uid"]
+                # Si aún no se ha añadido este usuario al conjunto de recomendaciones
                 if uid not in uid_seen:
                     uid_seen.add(uid)
                     score_map[uid] = {
                         "user_id": suggestion["user_id"],
                         "name": suggestion["name"],
-                        "score": 1,
+                        "score": 1,  # Asignar una puntuación inicial de 1
                     }
                 else:
+                    # Si ya existe, incrementar la puntuación para indicar mayor conexión
                     score_map[uid]["score"] += 1
 
     # Recomendaciones por intereses comunes
-    for topic in user.get("interested_in", []):
-        for related_user in topic.get("~interested_in", []):
+    for topic in user.get("interested_in", []):  # Para cada interés del usuario principal
+        for related_user in topic.get("~interested_in", []):  # Buscar usuarios con el mismo interés
+            # Asegurarse de que no sea el usuario principal ni un usuario ya seguido
             if related_user["uid"] != own_uid and related_user["uid"] not in already_followed_uids:
                 uid = related_user["uid"]
+                # Si el usuario aún no está en la lista de recomendaciones
                 if uid not in uid_seen:
                     uid_seen.add(uid)
                     score_map[uid] = {
                         "user_id": related_user["user_id"],
                         "name": related_user["name"],
-                        "score": 1,
+                        "score": 1,  # Asignar puntuación inicial
                     }
                 else:
+                    # Si ya está en la lista, aumentar su puntuación
                     score_map[uid]["score"] += 1
 
-    # Convertir a lista y ordenar por score
+    # Convertir el mapa de puntuaciones en una lista y ordenarlo de mayor a menor puntuación
     recommendations = sorted(score_map.values(), key=lambda x: x["score"], reverse=True)
 
+    # Crear la respuesta con los usuarios recomendados y el usuario original
     response = {
         "user": {"user_id": user_id, "name": user["name"]},
         "recommended_users": recommendations,
     }
 
+    # Imprimir los usuarios recomendados
     print("\nUsuarios recomendados:")
     print(json.dumps(response, indent=2))
+
 
 
 
