@@ -57,7 +57,7 @@ def main():
 
     while True:
         print_menu()
-        option = int(input("Enter your choice: "))
+        option = int(input("Introduce tu selección: "))
         if option == 1:
             if not schemaUp:
                 schemaUp = model.set_schema(client)
