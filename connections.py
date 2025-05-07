@@ -17,7 +17,7 @@ def menu():
 def main():
     while True:
         menu()
-        choice = input("Seleccione una opción: ")
+        choice = int(input("Seleccione una opción: "))
         if choice == 1:
             print("Conectando a CassandraDB...")
             # Aquí puedes agregar la lógica para conectarte a CassandraDB
