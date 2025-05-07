@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import os
+
 import pydgraph
-import model
-import populate
+
+from . import model, populate
 
 DGRAPH_URI = os.getenv("DGRAPH_URI", "localhost:9080")
 
@@ -62,23 +63,23 @@ def main():
             if not schemaUp:
                 schemaUp = model.set_schema(client)
             # Cargar datos desde archivos CSV
-            users_uids = populate.load_users("data/nodes/users.csv", client)
-            posts_uids = populate.load_posts("data/nodes/posts.csv", client)
-            topics_uids = populate.load_topics("data/nodes/topics.csv", client)
-            comments_uids = populate.load_comments("data/nodes/comments.csv", client)
+            users_uids = populate.load_users("Dgraph/data/nodes/users.csv", client)
+            posts_uids = populate.load_posts("Dgraph/data/nodes/posts.csv", client)
+            topics_uids = populate.load_topics("Dgraph/data/nodes/topics.csv", client)
+            comments_uids = populate.load_comments("Dgraph/data/nodes/comments.csv", client)
 
             # # Crear relaciones después de cargar nodos
-            populate.create_generic_edge(client, "data/edges/follows.csv", users_uids, users_uids, "follower_id", "followed_id", "follows")
+            populate.create_generic_edge(client, "Dgraph/data/edges/follows.csv", users_uids, users_uids, "follower_id", "followed_id", "follows")
 
-            populate.create_generic_edge(client, "data/edges/post.csv", users_uids, posts_uids, "user_id", "post_id", "posts")
-            populate.create_generic_edge(client, "data/edges/likes.csv", users_uids, posts_uids, "user_id", "post_id", "likes")
-            populate.create_generic_edge(client, "data/edges/shares.csv", users_uids, posts_uids, "user_id", "post_id", "shares")
+            populate.create_generic_edge(client, "Dgraph/data/edges/post.csv", users_uids, posts_uids, "user_id", "post_id", "posts")
+            populate.create_generic_edge(client, "Dgraph/data/edges/likes.csv", users_uids, posts_uids, "user_id", "post_id", "likes")
+            populate.create_generic_edge(client, "Dgraph/data/edges/shares.csv", users_uids, posts_uids, "user_id", "post_id", "shares")
 
-            populate.create_generic_edge(client, "data/edges/comments.csv", users_uids, comments_uids, "user_id", "comment_id", "comments")
-            populate.create_generic_edge(client, "data/edges/commented_on.csv", comments_uids, posts_uids, "comment_id", "post_id", "commented_on")
+            populate.create_generic_edge(client, "Dgraph/data/edges/comments.csv", users_uids, comments_uids, "user_id", "comment_id", "comments")
+            populate.create_generic_edge(client, "Dgraph/data/edges/commented_on.csv", comments_uids, posts_uids, "comment_id", "post_id", "commented_on")
 
-            populate.create_generic_edge(client, "data/edges/interested_in.csv", users_uids, topics_uids, "user_id", "topic_id", "interested_in")
-            populate.create_generic_edge(client, "data/edges/about.csv", posts_uids, topics_uids, "post_id", "topic_id", "about")
+            populate.create_generic_edge(client, "Dgraph/data/edges/interested_in.csv", users_uids, topics_uids, "user_id", "topic_id", "interested_in")
+            populate.create_generic_edge(client, "Dgraph/data/edges/about.csv", posts_uids, topics_uids, "post_id", "topic_id", "about")
 
             print("Data loaded successfully.")
 
@@ -128,9 +129,10 @@ def main():
             model.drop_all(client)
             schemaUp = False
         elif option == 15:
-            model.drop_all(client)
+            # model.drop_all(client)
             close_client_stub(client_stub)
-            exit(0)
+            # exit(0)
+            return
         elif option == 0:
             print("Saliendo del sistema...")
         else:
