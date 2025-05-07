@@ -4,6 +4,9 @@ import os
 import Dgraph.dgraph
 
 def menu():
+    print("\n--- MENÚ DE CONEXIONES ---")
+    print("Seleccione la base de datos a la que desea conectarse:")
+    
     print("1. CassandraDB")
     print("2. MongoDB")
     print("3. DgraphDB")
@@ -21,6 +24,9 @@ def main():
         elif choice == "3":
             print("Conectando a DgraphDB...")
             Dgraph.dgraph.main()  # Aquí llamamos a la función 'main()' dentro de Dgraph.main
+        elif choice == "0":
+            print("Saliendo del programa...")
+            exit(0)
         else:
             print("Opción no válida. Intente de nuevo.")
 
