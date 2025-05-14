@@ -18,13 +18,20 @@ def main_menu():
     print("10. Cargar saved_posts.csv")
     print("11. Cargar user_feed.csv")
     print("12. Cargar user_interactions.csv")
-    print("13. Salir")
+    print("13. Cargar post_views.csv")
+    print("14. Salir")
     print("--- CONSULTAS ---")
-    print("14. Ver seguidores de un usuario")
-    print("15. Ver posts guardados")
-    print("16. Ver feed de usuario")
-    print("17. Ver notificaciones")
-    print("18. Ver top likers")
+    print("15. Ver seguidores de un usuario")                  # 13566838-69cc-46ea-9352-ca754c24e3b1
+    print("16. Ver posts guardados")                           # 9bcd61b5-3c07-4933-b7c8-039ea26d47ff
+    print("17. Ver feed de usuario")                           # d26b3c89-fa12-47c3-9b26-2fc8355ac1bc
+    print("18. Ver notificaciones")                            # ad7d321a-6c00-4097-a9c7-c48d8cb35f04
+    print("19. Ver top likers")
+    print("20. Verificar si user_id existe en user_posts")
+    print("21. Ver comentarios de un post")
+    print("22. Ver likes de un post")
+    print("23. Ver historial de login de un usuario")
+    print("24. Ver posts guardados por un usuario")
+    print("25. Ver vistas de un post")
 
 def insert_post(session):
     user_id = uuid.uuid4()
@@ -153,19 +160,40 @@ def main():
                 uuid.UUID(r["user_id"]), r["interaction_type"], uuid.UUID(r["related_user_id"]), int(r["interaction_count"])))
 
         elif option == "13":
+            path = input("Ruta de post_views.csv: ")
+            query = session.prepare("""
+                INSERT INTO social_network.post_views (post_id, viewed_at, user_id)
+                VALUES (?, ?, ?)
+            """)
+            load_csv_generic(session, path, query, lambda r: (
+                uuid.UUID(r["post_id"]), datetime.fromisoformat(r["viewed_at"].replace("Z", "+00:00")), uuid.UUID(r["user_id"])))
+
+        elif option == "14":
             print("Saliendo...")
             break
 
-        elif option == "14":
-            consultar_seguidores(session)
         elif option == "15":
-            consultar_guardados(session)
+            consultar_seguidores(session)
         elif option == "16":
-            consultar_feed(session)
+            consultar_guardados(session)
         elif option == "17":
-            consultar_notificaciones(session)
+            consultar_feed(session)
         elif option == "18":
+            consultar_notificaciones(session)
+        elif option == "19":
             consultar_top_likers(session)
+        elif option == "20":
+            verificar_usuario_en_posts(session)
+        elif option == "21":
+            ver_comentarios_post(session)
+        elif option == "22":
+            ver_likes_post(session)
+        elif option == "23":
+            ver_logins_usuario(session)
+        elif option == "24":
+            ver_guardados_por_usuario(session)
+        elif option == "25":
+            ver_vistas_post(session)
         else:
             print("Opción inválida.")
 
@@ -203,6 +231,73 @@ def consultar_top_likers(session):
     ordenados = sorted(resultados, key=lambda x: x.interaction_count, reverse=True)
     for r in ordenados[:10]:
         print(f"{r.related_user_id} → {r.interaction_count} interacciones")
+
+# Prueba
+def verificar_usuario_en_posts(session):
+    user_id = input("Ingresa el UUID del usuario a verificar: ")
+    query = """
+    SELECT post_id, created_at, content FROM social_network.user_posts
+    WHERE user_id = %s
+    """
+    try:
+        results = session.execute(query, [uuid.UUID(user_id)])
+        rows = list(results)
+        if rows:
+            print(f"Usuario {user_id} tiene {len(rows)} post(s):")
+            for row in rows:
+                print(f"- {row.created_at}: {row.content}")
+        else:
+            print("Este usuario no tiene posts registrados.")
+    except Exception as e:
+        print("Error durante la consulta:", e)
+
+#Otras con
+def ver_comentarios_post(session):
+    post_id = input("Ingrese el UUID del post: ")
+    query = """
+    SELECT comment_id, user_id, commented_at, comment FROM social_network.post_comments
+    WHERE post_id = %s
+    """
+    for row in session.execute(query, [uuid.UUID(post_id)]):
+        print(f"{row.commented_at} - {row.user_id}: {row.comment}")
+
+def ver_likes_post(session):
+    post_id = input("Ingrese el UUID del post: ")
+    query = """
+    SELECT liked_at, user_id FROM social_network.post_likes
+    WHERE post_id = %s
+    """
+    for row in session.execute(query, [uuid.UUID(post_id)]):
+        print(f"{row.liked_at} - Liked by: {row.user_id}")
+
+def ver_logins_usuario(session):
+    user_id = input("Ingrese el UUID del usuario: ")
+    query = """
+    SELECT login_time, device_info FROM social_network.user_logins
+    WHERE user_id = %s
+    """
+    for row in session.execute(query, [uuid.UUID(user_id)]):
+        print(f"{row.login_time} - Device: {row.device_info}")
+
+def ver_guardados_por_usuario(session):
+    user_id = input("Ingrese el UUID del usuario: ")
+    query = """
+    SELECT post_id, saved_at FROM social_network.saved_posts
+    WHERE user_id = %s
+    """
+    resultados = session.execute(query, [uuid.UUID(user_id)])
+    ordenados = sorted(resultados, key=lambda x: x.saved_at, reverse=True)
+    for row in ordenados:
+        print(f"{row.saved_at} - {row.post_id}")
+
+def ver_vistas_post(session):
+    post_id = input("Ingrese el UUID del post: ")
+    query = """
+    SELECT viewed_at, user_id FROM social_network.post_views
+    WHERE post_id = %s
+    """
+    for row in session.execute(query, [uuid.UUID(post_id)]):
+        print(f"{row.viewed_at} - Visto por: {row.user_id}")
 
 if __name__ == "__main__":
     main()
