@@ -2,15 +2,17 @@ import sys
 import os
 
 import Cassandra
+import Cassandra.main
 import MongoDB
 import Dgraph.dgraph
 
 def menu():
     print("\n--- MENÚ DE CONEXIONES ---")
     print("Seleccione la base de datos a la que desea conectarse:")
-    print("1. CassandraDB")
-    print("2. MongoDB")
-    print("3. DgraphDB")
+    print("1. Cargar datos de todas las bases de datos")
+    print("2. CassandraDB")
+    print("3. MongoDB")
+    print("4. DgraphDB")
     print("0. Terminar programa")
 
 
@@ -19,11 +21,17 @@ def main():
         menu()
         choice = int(input("Seleccione una opción: "))
         if choice == 1:
-            print("Conectando a CassandraDB...")
-            # Aquí puedes agregar la lógica para conectarte a CassandraDB
+            print("Cargando Datos CassandraDB...")
+            print("Cargando Datos MongoDB...")
+            print("Cargando Datos DgraphDB...")
+            Dgraph.dgraph.load_data()
         elif choice == 2:
-            print("Conectando a MongoDB...")
+            print("Conectando a CassandraDB...")
+            Cassandra.main.main()  # Aquí llamamos a la función 'main()' dentro de Cassandra.main
         elif choice == 3:
+            print("Conectando a MongoDB...")
+            MongoDB
+        elif choice == 4:
             print("Conectando a DgraphDB...")
             Dgraph.dgraph.main()  # Aquí llamamos a la función 'main()' dentro de Dgraph.main
         elif choice == 0:
