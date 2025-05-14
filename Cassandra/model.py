@@ -48,7 +48,7 @@ def create_tables(session):
         """
         CREATE TABLE IF NOT EXISTS post_comments (
             post_id UUID,
-            comment_id TIMEUUID,
+            comment_id UUID,
             user_id UUID,
             commented_at TIMESTAMP,
             comment TEXT,
