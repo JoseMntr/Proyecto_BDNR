@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List
 from bson import ObjectId
 from model import (
+    connect_and_initialize,
     get_all_profiles,
     get_profile_by_id,
     insert_profile,
@@ -54,3 +55,9 @@ def remove_profile(profile_id: str):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Profile not found")
     return {"deleted": True}
+
+def main():
+    connect_and_initialize()
+    print("Perfiles disponibles:")
+    for profile in get_all_profiles():
+        print(profile["username"])
