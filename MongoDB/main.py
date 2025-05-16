@@ -59,8 +59,11 @@ def remove_profile(profile_id: str):
 def main():
     connect_and_initialize()
     print("Perfiles disponibles:")
-    for profile in get_all_profiles():
-        print(profile["username"])
+    if not get_all_profiles():
+        print("No hay perfiles disponibles.")
+    else:
+        for profile in get_all_profiles():
+            print(profile["username"])
 
 if __name__ == "__main__":
     try:
