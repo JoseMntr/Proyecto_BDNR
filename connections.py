@@ -25,7 +25,6 @@ def main():
             
             # print("Cargando Datos MongoDB...")
             
-
             print("="*50)
             print("Cargando Datos DgraphDB...")
             Dgraph.dgraph.load_data()
@@ -44,18 +43,6 @@ def main():
             
         else:
             print("Opción no válida. Intente de nuevo.")
-        
-
-        # elif choice == 2:
-        #     print("Conectando a CassandraDB...")
-        #     Cassandra.main.main()  # Aquí llamamos a la función 'main()' dentro de Cassandra.main
-        # elif choice == 3:
-        #     print("Conectando a MongoDB...")
-        #     MongoDB.main.main()
-        # elif choice == 4:
-        #     print("Conectando a DgraphDB...")
-        #     Dgraph.dgraph.main()  # Aquí llamamos a la función 'main()' dentro de Dgraph.main
-
         
 
 # Menu principal
@@ -110,7 +97,15 @@ def menu_dgraph():
         print(f"{key}. {mm_options[key]}")
 
 def menu_mongodb():
-
+    mm_options = {
+        1 : "Poblar base de datos",
+    }
+    
+    print("\n--- MENÚ PRINCIPAL MONGODB ---")
+    for key in sorted(mm_options.keys()):
+        print(f"{key}. {mm_options[key]}")
+        
+    return
 
 
 if __name__ == "__main__":
