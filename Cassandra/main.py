@@ -29,7 +29,8 @@ def main_menu():
     print("17. Ver top 5 usuarios con más publicaciones")
 
 def insert_post(session):
-    user_id = uuid.uuid4()
+    # user_id = uuid.uuid4()
+    user_id = uuid.UUID(input("Ingresa el UUID del usuario: "))
     post_id = uuid.uuid4()
     content = input("Contenido del post: ")
     created_at = datetime.utcnow()
@@ -60,53 +61,63 @@ def load_csv_generic(session, csv_path, insert_query, parser_func):
             session.execute(insert_query, parser_func(row))
     print(f"Datos cargados desde {csv_path}")
 
-def main():
+def main(option):
     session = model.connect_and_initialize()
 
-    while True:
-        main_menu()
-        option = input("Selecciona una opción: ")
-
-        if option == "1":
-            print("Keyspace y tablas ya creadas al iniciar.")
-        elif option == "2":
-            insert_post(session)
-        elif option == "3":
-            get_user_posts(session)
-        elif option == "4":
-            load_data()
-        elif option == "5":
-            print("Saliendo...")
-            break
-
-        elif option == "6":
-            consultar_seguidores(session)
-        elif option == "7":
-            consultar_guardados(session)
-        elif option == "8":
-            consultar_feed(session)
-        elif option == "9":
-            consultar_notificaciones(session)
-        elif option == "10":
-            consultar_top_likers(session)
-        elif option == "11":
-            verificar_usuario_en_posts(session)
-        elif option == "12":
-            ver_comentarios_post(session)
-        elif option == "13":
-            ver_likes_post(session)
-        elif option == "14":
-            ver_logins_usuario(session)
-        elif option == "15":
-            ver_guardados_por_usuario(session)
-        elif option == "16":
-            ver_vistas_post(session)
-        elif option == "17":
-            top_usuarios_mas_activos(session)
-        elif option == "0":
-            drop_keyspace(session)
-        else:
-            print("Opción inválida.")
+    if option == "1":
+        print("Keyspace y tablas ya creadas al iniciar.")
+        return
+    elif option == "2":
+        insert_post(session)
+        return
+    elif option == "3":
+        get_user_posts(session)
+        return
+    elif option == "4":
+        load_data()
+        return
+    elif option == "5":
+        drop_keyspace(session)
+        return
+    elif option == "6":
+        consultar_seguidores(session)
+        return
+    elif option == "7":
+        consultar_guardados(session)
+        return
+    elif option == "8":
+        consultar_feed(session)
+        return
+    elif option == "9":
+        consultar_notificaciones(session)
+        return
+    elif option == "10":
+        consultar_top_likers(session)
+        return
+    elif option == "11":
+        verificar_usuario_en_posts(session)
+        return
+    elif option == "12":
+        ver_comentarios_post(session)
+        return
+    elif option == "13":
+        ver_likes_post(session)
+        return
+    elif option == "14":
+        ver_logins_usuario(session)
+        return
+    elif option == "15":
+        ver_guardados_por_usuario(session)
+        return
+    elif option == "16":
+        ver_vistas_post(session)
+        return
+    elif option == "17":
+        top_usuarios_mas_activos(session)
+        return
+    
+    else:
+        print("Opción inválida.")
 
 def consultar_seguidores(session):
     user_id = input("Ingrese el UUID del usuario: ")
