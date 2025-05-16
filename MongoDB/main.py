@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 from bson import ObjectId
-from model import (
+from . model  import (
     connect_and_initialize,
     get_all_profiles,
     get_profile_by_id,
@@ -61,3 +61,9 @@ def main():
     print("Perfiles disponibles:")
     for profile in get_all_profiles():
         print(profile["username"])
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print("Error: {}".format(e))
