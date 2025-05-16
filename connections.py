@@ -4,6 +4,7 @@ import os
 import Cassandra
 import Cassandra.main
 import MongoDB
+import MongoDB.main
 import Dgraph.dgraph
 
 def menu():
@@ -22,7 +23,8 @@ def main():
         choice = int(input("Seleccione una opción: "))
         if choice == 1:
             print("Cargando Datos CassandraDB...")
-            print("Cargando Datos MongoDB...")
+            Cassandra.main.load_data()  # Aquí llamamos a la función 'load_data()' dentro de Cassandra.main
+            # print("Cargando Datos MongoDB...")
             print("Cargando Datos DgraphDB...")
             Dgraph.dgraph.load_data()
         elif choice == 2:
@@ -30,7 +32,7 @@ def main():
             Cassandra.main.main()  # Aquí llamamos a la función 'main()' dentro de Cassandra.main
         elif choice == 3:
             print("Conectando a MongoDB...")
-            MongoDB
+            MongoDB.main.main()
         elif choice == 4:
             print("Conectando a DgraphDB...")
             Dgraph.dgraph.main()  # Aquí llamamos a la función 'main()' dentro de Dgraph.main
