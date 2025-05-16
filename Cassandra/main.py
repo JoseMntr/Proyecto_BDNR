@@ -1,8 +1,9 @@
 from cassandra.cluster import Cluster
-import model
+from . import model
 import uuid
 from datetime import datetime
 import csv
+
 
 def main_menu():
     print("\n--- MENÚ CASSANDRA ---")
@@ -10,7 +11,8 @@ def main_menu():
     print("2. Insertar un post")
     print("3. Ver posts de un usuario")
     print("4. Cargar datos")
-    print("5. Salir")
+    print("5. Regresar al menú principal")
+    print("0. Eliminar keyspace")
     print("--- CONSULTAS ---")
     print("6. Ver seguidores de un usuario")                  # 13566838-69cc-46ea-9352-ca754c24e3b1
     print("7. Ver posts guardados")                           # 9bcd61b5-3c07-4933-b7c8-039ea26d47ff
@@ -70,85 +72,86 @@ def main():
         elif option == "3":
             get_user_posts(session)
         elif option == "4":
-            path = "data/user_posts.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.user_posts (user_id, post_id, content, created_at)
-                VALUES (?, ?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), r["content"], datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))))
+            load_data()
+            # path = "Cassandra/data/user_posts.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.user_posts (user_id, post_id, content, created_at)
+            #     VALUES (?, ?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), r["content"], datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))))
 
-            path = "data/post_likes.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.post_likes (post_id, liked_at, user_id)
-                VALUES (?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["post_id"]), datetime.fromisoformat(r["liked_at"].replace("Z", "+00:00")), uuid.UUID(r["user_id"])))
+            # path = "Cassandra/data/post_likes.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.post_likes (post_id, liked_at, user_id)
+            #     VALUES (?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["post_id"]), datetime.fromisoformat(r["liked_at"].replace("Z", "+00:00")), uuid.UUID(r["user_id"])))
 
-            path = "data/post_comments.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.post_comments (post_id, comment_id, user_id, commented_at, comment)
-                VALUES (?, ?, ?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["post_id"]), uuid.UUID(r["comment_id"]), uuid.UUID(r["user_id"]), datetime.fromisoformat(r["commented_at"].replace("Z", "+00:00")), r["comment"]))
+            # path = "Cassandra/data/post_comments.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.post_comments (post_id, comment_id, user_id, commented_at, comment)
+            #     VALUES (?, ?, ?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["post_id"]), uuid.UUID(r["comment_id"]), uuid.UUID(r["user_id"]), datetime.fromisoformat(r["commented_at"].replace("Z", "+00:00")), r["comment"]))
 
-            path = "data/user_logins.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.user_logins (user_id, login_time, device_info)
-                VALUES (?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["user_id"]), datetime.fromisoformat(r["login_time"].replace("Z", "+00:00")), r["device_info"]))
+            # path = "Cassandra/data/user_logins.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.user_logins (user_id, login_time, device_info)
+            #     VALUES (?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["user_id"]), datetime.fromisoformat(r["login_time"].replace("Z", "+00:00")), r["device_info"]))
 
-            path = "data/notifications.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.notifications (user_id, created_at, notification_id, type, message)
-                VALUES (?, ?, ?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["user_id"]), datetime.fromisoformat(r["created_at"].replace("Z", "+00:00")), uuid.UUID(r["notification_id"]), r["type"], r["message"]))
+            # path = "Cassandra/data/notifications.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.notifications (user_id, created_at, notification_id, type, message)
+            #     VALUES (?, ?, ?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["user_id"]), datetime.fromisoformat(r["created_at"].replace("Z", "+00:00")), uuid.UUID(r["notification_id"]), r["type"], r["message"]))
 
-            path = "data/user_followers.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.user_followers (user_id, follower_id, followed_at)
-                VALUES (?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["user_id"]), uuid.UUID(r["follower_id"]), datetime.fromisoformat(r["followed_at"].replace("Z", "+00:00"))))
+            # path = "Cassandra/data/user_followers.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.user_followers (user_id, follower_id, followed_at)
+            #     VALUES (?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["user_id"]), uuid.UUID(r["follower_id"]), datetime.fromisoformat(r["followed_at"].replace("Z", "+00:00"))))
 
-            path = "data/saved_posts.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.saved_posts (user_id, post_id, saved_at)
-                VALUES (?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), datetime.fromisoformat(r["saved_at"].replace("Z", "+00:00"))))
+            # path = "Cassandra/data/saved_posts.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.saved_posts (user_id, post_id, saved_at)
+            #     VALUES (?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), datetime.fromisoformat(r["saved_at"].replace("Z", "+00:00"))))
 
-            path = "data/user_feed.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.user_feed (user_id, post_id, author_id, content, created_at)
-                VALUES (?, ?, ?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), uuid.UUID(r["author_id"]), r["content"], datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))))
+            # path = "Cassandra/data/user_feed.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.user_feed (user_id, post_id, author_id, content, created_at)
+            #     VALUES (?, ?, ?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), uuid.UUID(r["author_id"]), r["content"], datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))))
 
-            path = "data/user_interactions.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.user_interactions (user_id, interaction_type, related_user_id, interaction_count)
-                VALUES (?, ?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["user_id"]), r["interaction_type"], uuid.UUID(r["related_user_id"]), int(r["interaction_count"])))
+            # path = "Cassandra/data/user_interactions.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.user_interactions (user_id, interaction_type, related_user_id, interaction_count)
+            #     VALUES (?, ?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["user_id"]), r["interaction_type"], uuid.UUID(r["related_user_id"]), int(r["interaction_count"])))
 
-            path = "data/post_views.csv"
-            query = session.prepare("""
-                INSERT INTO social_network.post_views (post_id, viewed_at, user_id)
-                VALUES (?, ?, ?)
-            """)
-            load_csv_generic(session, path, query, lambda r: (
-                uuid.UUID(r["post_id"]), datetime.fromisoformat(r["viewed_at"].replace("Z", "+00:00")), uuid.UUID(r["user_id"])))
+            # path = "Cassandra/data/post_views.csv"
+            # query = session.prepare("""
+            #     INSERT INTO social_network.post_views (post_id, viewed_at, user_id)
+            #     VALUES (?, ?, ?)
+            # """)
+            # load_csv_generic(session, path, query, lambda r: (
+            #     uuid.UUID(r["post_id"]), datetime.fromisoformat(r["viewed_at"].replace("Z", "+00:00")), uuid.UUID(r["user_id"])))
 
         elif option == "5":
             print("Saliendo...")
@@ -176,6 +179,8 @@ def main():
             ver_guardados_por_usuario(session)
         elif option == "16":
             ver_vistas_post(session)
+        elif option == "0":
+            drop_keyspace(session)
         else:
             print("Opción inválida.")
 
@@ -280,6 +285,96 @@ def ver_vistas_post(session):
     """
     for row in session.execute(query, [uuid.UUID(post_id)]):
         print(f"{row.viewed_at} - Visto por: {row.user_id}")
+
+
+def load_data():
+    session = model.connect_and_initialize()
+    path = "Cassandra/data/user_posts.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.user_posts (user_id, post_id, content, created_at)
+        VALUES (?, ?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), r["content"], datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))))
+
+    path = "Cassandra/data/post_likes.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.post_likes (post_id, liked_at, user_id)
+        VALUES (?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["post_id"]), datetime.fromisoformat(r["liked_at"].replace("Z", "+00:00")), uuid.UUID(r["user_id"])))
+
+    path = "Cassandra/data/post_comments.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.post_comments (post_id, comment_id, user_id, commented_at, comment)
+        VALUES (?, ?, ?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["post_id"]), uuid.UUID(r["comment_id"]), uuid.UUID(r["user_id"]), datetime.fromisoformat(r["commented_at"].replace("Z", "+00:00")), r["comment"]))
+
+    path = "Cassandra/data/user_logins.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.user_logins (user_id, login_time, device_info)
+        VALUES (?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["user_id"]), datetime.fromisoformat(r["login_time"].replace("Z", "+00:00")), r["device_info"]))
+
+    path = "Cassandra/data/notifications.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.notifications (user_id, created_at, notification_id, type, message)
+        VALUES (?, ?, ?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["user_id"]), datetime.fromisoformat(r["created_at"].replace("Z", "+00:00")), uuid.UUID(r["notification_id"]), r["type"], r["message"]))
+
+    path = "Cassandra/data/user_followers.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.user_followers (user_id, follower_id, followed_at)
+        VALUES (?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["user_id"]), uuid.UUID(r["follower_id"]), datetime.fromisoformat(r["followed_at"].replace("Z", "+00:00"))))
+
+    path = "Cassandra/data/saved_posts.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.saved_posts (user_id, post_id, saved_at)
+        VALUES (?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), datetime.fromisoformat(r["saved_at"].replace("Z", "+00:00"))))
+
+    path = "Cassandra/data/user_feed.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.user_feed (user_id, post_id, author_id, content, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["user_id"]), uuid.UUID(r["post_id"]), uuid.UUID(r["author_id"]), r["content"], datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))))
+
+    path = "Cassandra/data/user_interactions.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.user_interactions (user_id, interaction_type, related_user_id, interaction_count)
+        VALUES (?, ?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["user_id"]), r["interaction_type"], uuid.UUID(r["related_user_id"]), int(r["interaction_count"])))
+
+    path = "Cassandra/data/post_views.csv"
+    query = session.prepare("""
+        INSERT INTO social_network.post_views (post_id, viewed_at, user_id)
+        VALUES (?, ?, ?)
+    """)
+    load_csv_generic(session, path, query, lambda r: (
+        uuid.UUID(r["post_id"]), datetime.fromisoformat(r["viewed_at"].replace("Z", "+00:00")), uuid.UUID(r["user_id"])))
+    
+
+def drop_keyspace(session):
+    query = f"DROP KEYSPACE IF EXISTS social_network;"
+    session.execute(query)
+    print(f"Keyspace social_network eliminado.")
+
 
 if __name__ == "__main__":
     main()
