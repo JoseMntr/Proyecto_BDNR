@@ -3,6 +3,7 @@ from . import model
 import uuid
 from datetime import datetime
 import csv
+from collections import Counter
 
 
 def main_menu():
@@ -14,10 +15,10 @@ def main_menu():
     print("5. Regresar al menú principal")
     print("0. Eliminar keyspace")
     print("--- CONSULTAS ---")
-    print("6. Ver seguidores de un usuario")                  # 13566838-69cc-46ea-9352-ca754c24e3b1
-    print("7. Ver posts guardados")                           # 9bcd61b5-3c07-4933-b7c8-039ea26d47ff
-    print("8. Ver feed de usuario")                           # d26b3c89-fa12-47c3-9b26-2fc8355ac1bc
-    print("9. Ver notificaciones")                            # ad7d321a-6c00-4097-a9c7-c48d8cb35f04
+    print("6. Ver seguidores de un usuario")                  
+    print("7. Ver posts guardados")                           
+    print("8. Ver feed de usuario")                           
+    print("9. Ver notificaciones")                            
     print("10. Ver top likers")
     print("11. Verificar si user_id existe en user_posts")
     print("12. Ver comentarios de un post")
@@ -25,6 +26,7 @@ def main_menu():
     print("14. Ver historial de login de un usuario")
     print("15. Ver posts guardados por un usuario")
     print("16. Ver vistas de un post")
+    print("17. Ver top 5 usuarios con más publicaciones")
 
 def insert_post(session):
     user_id = uuid.uuid4()
@@ -99,6 +101,8 @@ def main():
             ver_guardados_por_usuario(session)
         elif option == "16":
             ver_vistas_post(session)
+        elif option == "17":
+            top_usuarios_mas_activos(session)
         elif option == "0":
             drop_keyspace(session)
         else:
@@ -205,6 +209,17 @@ def ver_vistas_post(session):
     """
     for row in session.execute(query, [uuid.UUID(post_id)]):
         print(f"{row.viewed_at} - Visto por: {row.user_id}")
+
+def top_usuarios_mas_activos(session):
+    query = "SELECT user_id FROM social_network.user_posts"
+    user_counter = Counter()
+
+    for row in session.execute(query):
+        user_counter[row.user_id] += 1
+
+    print("\nTop 5 usuarios con más publicaciones:")
+    for user_id, count in user_counter.most_common(5):
+        print(f"Usuario: {user_id} - Posts: {count}")
 
 
 def load_data():
