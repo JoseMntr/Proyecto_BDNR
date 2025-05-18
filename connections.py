@@ -8,7 +8,6 @@ import Mongo2.mongo
 import Dgraph.dgraph
 
 
-
 def main():
     while True:
 
@@ -109,7 +108,7 @@ def menu_mongodb():
     print("33. Consultar un perfil")
     print("34. Ver preferencias")
     print("35. Ver perfiles más usados")
-    print("36. Ver perfiles generales por usuario")
+    print("36. Ver perfiles de red social por usuario")
     print("37. Agregar nuevo perfil")
     print("38. Modificar perfil")
     print("39. Eliminar perfil")
