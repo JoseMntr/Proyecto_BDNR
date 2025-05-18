@@ -2,8 +2,9 @@ import sys
 import os
 
 import Cassandra.main
-import MongoDB
-import MongoDB.main
+import Mongo2.populate
+import app
+import Mongo2.mongo
 import Dgraph.dgraph
 
 
@@ -11,10 +12,12 @@ import Dgraph.dgraph
 def main():
     while True:
 
+        app
         # Imprimir los menús
         menu_principal()
         menu_cassandra()
         menu_dgraph()
+        menu_mongodb()
 
         choice = int(input("Seleccione una opción: "))
 
@@ -23,8 +26,10 @@ def main():
             print("Cargando Datos CassandraDB...")
             Cassandra.main.load_data()  # Aquí llamamos a la función 'load_data()' dentro de Cassandra.main
             
-            # print("Cargando Datos MongoDB...")
-            
+            print("="*50)
+            print("Cargando Datos MongoDB...")
+            Mongo2.populate.main()
+
             print("="*50)
             print("Cargando Datos DgraphDB...")
             Dgraph.dgraph.load_data()
@@ -41,6 +46,9 @@ def main():
             choice = choice - 18
             Dgraph.dgraph.main(choice)  # Aquí llamamos a la función 'main()' dentro de Dgraph.main
             
+        elif choice >= 33 and choice <= 44:
+            choice = choice - 32
+            Mongo2.mongo.main(str(choice))
         else:
             print("Opción no válida. Intente de nuevo.")
         
@@ -97,15 +105,19 @@ def menu_dgraph():
         print(f"{key}. {mm_options[key]}")
 
 def menu_mongodb():
-    mm_options = {
-        1 : "Poblar base de datos",
-    }
-    
-    print("\n--- MENÚ PRINCIPAL MONGODB ---")
-    for key in sorted(mm_options.keys()):
-        print(f"{key}. {mm_options[key]}")
-        
-    return
+    print("\n==== MENU PRINCIPAL MONGODB ====")
+    print("33. Consultar un perfil")
+    print("34. Ver preferencias")
+    print("35. Ver perfiles más usados")
+    print("36. Ver perfiles generales por usuario")
+    print("37. Agregar nuevo perfil")
+    print("38. Modificar perfil")
+    print("39. Eliminar perfil")
+    print("40. Actualizar preferencias")
+    print("41. Total de posts por usuario")
+    print("42. Rankear perfiles por engagement")
+    print("43. Buscar por red social")
+    print("44. Mostrar el perfil más activo por usuario")
 
 
 if __name__ == "__main__":
