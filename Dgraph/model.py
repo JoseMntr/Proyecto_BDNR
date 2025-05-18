@@ -425,8 +425,12 @@ def get_mutual_followers(user1_id, user2_id, client):
       mutual_users = [user1_follows[uid] for uid in mutual_uids]
     
     except Exception as e:
-      print("No se encontraron usuarios")
-      return
+      if e == IndexError:
+        print("No se encontraron usuarios")
+        return
+      else:
+          print(e)
+          return
 
     response = {"mutual_followees": mutual_users}
 
