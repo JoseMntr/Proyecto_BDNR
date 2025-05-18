@@ -1,0 +1,3 @@
+user_id,username,social_media,number_of_posts,number_of_followers,number_of_follows,profile_picture,log_in_times,preferences
+60f6cbb9287f0f3c2cfcb872,johndoe,Instagram,120,450,210,https://url.com/pic.jpg,34,"{""preferred_types"": [""image"", ""video""], ""notification_settings"": {""email"": true, ""push"": false}}"
+60f6cbb9287f0f3c2cfcb873,johndoe,Facebook,120,450,210,https://url.com/pic.jpg,34,"{""preferred_types"": [""image"", ""video""], ""notification_settings"": {""email"": true, ""push"": false}}"
