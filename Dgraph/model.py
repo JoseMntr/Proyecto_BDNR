@@ -416,11 +416,17 @@ def get_mutual_followers(user1_id, user2_id, client):
     res = client.txn(read_only=True).query(query_str)
     data = json.loads(res.json)
 
-    user1_follows = {u["uid"]: u for u in data.get("user1", [{}])[0].get("follows", [])}
-    user2_follows = {u["uid"]: u for u in data.get("user2", [{}])[0].get("follows", [])}
+    try:
+      user1_follows = {u["uid"]: u for u in data.get("user1", [{}])[0].get("follows", [])}
+      user2_follows = {u["uid"]: u for u in data.get("user2", [{}])[0].get("follows", [])}
 
-    mutual_uids = set(user1_follows.keys()) & set(user2_follows.keys())
-    mutual_users = [user1_follows[uid] for uid in mutual_uids]
+      mutual_uids = set(user1_follows.keys()) & set(user2_follows.keys())
+      
+      mutual_users = [user1_follows[uid] for uid in mutual_uids]
+    
+    except Exception as e:
+      print("No se encontraron usuarios")
+      return
 
     response = {"mutual_followees": mutual_users}
 
