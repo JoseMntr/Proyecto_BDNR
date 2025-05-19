@@ -19,6 +19,7 @@ def create_tables(session):
             user_id UUID,
             follower_id UUID,
             followed_at TIMESTAMP,
+            user_name TEXT,
             PRIMARY KEY (user_id, follower_id)
         )
         """,
@@ -42,6 +43,7 @@ def create_tables(session):
             post_id UUID,
             user_id UUID,
             liked_at TIMESTAMP,
+            user_name TEXT,
             PRIMARY KEY (post_id, liked_at, user_id)
         ) WITH CLUSTERING ORDER BY (liked_at DESC, user_id ASC)
         """,
@@ -52,6 +54,7 @@ def create_tables(session):
             user_id UUID,
             commented_at TIMESTAMP,
             comment TEXT,
+            user_name TEXT,
             PRIMARY KEY (post_id, comment_id)
         ) WITH CLUSTERING ORDER BY (comment_id ASC)
         """,
@@ -98,6 +101,7 @@ def create_tables(session):
             user_id UUID,
             post_id UUID,
             saved_at TIMESTAMP,
+            user_name TEXT,
             PRIMARY KEY (user_id, saved_at, post_id)
         ) WITH CLUSTERING ORDER BY (saved_at DESC, post_id ASC)
         """,
@@ -106,6 +110,7 @@ def create_tables(session):
             post_id UUID,
             user_id UUID,
             viewed_at TIMESTAMP,
+            user_name TEXT,
             PRIMARY KEY (post_id, viewed_at, user_id)
         ) WITH CLUSTERING ORDER BY (viewed_at DESC, user_id ASC)
         """,
